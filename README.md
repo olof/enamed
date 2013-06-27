@@ -9,6 +9,30 @@ queries (with the caveat that it only responds with not
 implemented to all queries. It does respond with the query's ID
 and opcode though...).
 
+With that said, to get it up and running:
+
+    $ make
+    $ erl
+    1> listener:start(5353)
+
+And from another shell:
+
+    $ dig @127.0.0.1 +notcp -p 5353 example.com
+
+And you should see something like this:
+
+    ; <<>> DiG 9.8.4-rpz2+rl005.12-P1 <<>> @127.0.0.1 +notcp -p 5353 example.com
+    ; (1 server found)
+    ;; global options: +cmd
+    ;; Got answer:
+    ;; ->>HEADER<<- opcode: QUERY, status: NOTIMP, id: 64923
+    ;; flags: qr; QUERY: 0, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0
+
+    ;; Query time: 0 msec
+    ;; SERVER: 127.0.0.1#5353(127.0.0.1)
+    ;; WHEN: Thu Jun 27 21:47:53 2013
+    ;; MSG SIZE  rcvd: 12
+
 TODO
 ====
 Lots of stuff! Of the top of my head:
