@@ -15,13 +15,36 @@
 	name, type, class, ttl, length, data
 }).
 
-% Classes, RFC 1035
+%% Opcodes
+% RFC 1035
+-define(DNS_OPCODE_QUERY, 0).
+-define(DNS_OPCODE_IQUERY, 1).
+-define(DNS_OPCODE_STATUS, 2).
+
+%% Rcodes
+% RFC 1035
+-define(DNS_RCODE_NOERROR, 0).
+-define(DNS_RCODE_FORMERR, 1).
+-define(DNS_RCODE_SERVFAIL, 2).
+-define(DNS_RCODE_NXDOMAIN, 3).
+-define(DNS_RCODE_NOTIMP, 4).
+-define(DNS_RCODE_REFUSED, 5).
+% RFC 2136
+-define(DNS_RCODE_YXDOMAIN, 6).
+-define(DNS_RCODE_YXRRSET, 7).
+-define(DNS_RCODE_NXRRSET, 8).
+-define(DNS_RCODE_NOTAUTH, 9).
+-define(DNS_RCODE_NOTZONE, 10).
+
+%% Classes
+% RFC 1035
 -define(DNS_CLASS_IN, 1).
 -define(DNS_CLASS_CS, 2).
 -define(DNS_CLASS_CH, 3).
 -define(DNS_CLASS_HS, 4).
 
-% RR Types, RFC 1035
+%% RR Types
+% RFC 1035
 -define(DNS_RR_A, 1).
 -define(DNS_RR_NS, 2).
 -define(DNS_RR_MD, 3).
