@@ -18,11 +18,11 @@
 % following format:
 %
 % {
-%  header, #dns_header,
-%  question, [#dns_question, ...],
-%  answer, {#dns_rr, ...],
-%  auth, {#dns_rr, ...],
-%  additional, {#dns_rr, ...],
+%  {header, #dns_header},
+%  {question, [#dns_question{}, ...]},
+%  {answer, [#dns_rr{}, ...]},
+%  {auth, [#dns_rr{}, ...]},
+%  {additional, [#dns_rr{}, ...]},
 % }
 %
 % dns_question is a record with the fields:
