@@ -9,7 +9,7 @@
 % offered as-is, without any warranty.
 
 -module(dnspkt).
--export([decode/1, dnspkt_encode_header/1, dnspkt_encode_qsection/1]).
+-export([decode/1, encode/1]).
 -include("dnsrecord.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
@@ -67,6 +67,29 @@ decode(RawPkt) ->
 		{ additional, Additional }
 	}.
 
+encode(Dns) ->
+	{
+		{header, Header},
+		{question, Questions},
+		{answer, Answers},
+		{auth, Auths},
+		{additional, Additionals}
+	} = Dns,
+
+	BinHeader = dnspkt_encode_header(Header),
+	BinQuestions = dnspkt_encode_qsection(Questions),
+	BinAnswer = dnspkt_encode_rrsection(Answers),
+	BinAuth = dnspkt_encode_rrsection(Auths),
+	BinAdditional = dnspkt_encode_rrsection(Additionals),
+
+	<<
+		BinHeader/binary,
+		BinQuestions/binary,
+		BinAnswer/binary,
+		BinAuth/binary,
+		BinAdditional/binary
+	>>.
+
 dnspkt_encode_header(Header) ->
 	Id = Header#dns_header.id,
 	Qr = Header#dns_header.qr,
@@ -107,6 +130,25 @@ dnspkt_encode_question(Question) ->
 
 	EncQname = encode_qname(Name),
 	<<EncQname/binary, Type:16, Class:16>>.
+
+dnspkt_encode_rrsection(Section) ->
+	dnspkt_encode_rrsection(Section, <<>>).
+
+dnspkt_encode_rrsection([], Pkt) ->
+	Pkt;
+dnspkt_encode_rrsection([RR|Section], Pkt) ->
+	EncRR = dnspkt_encode_rr(RR),
+	dnspkt_encode_rrsection(Section, <<Pkt/binary, EncRR/binary>>).
+
+dnspkt_encode_rr(RR) ->
+	Name = encode_qname(RR#dns_rr.name),
+	Type = RR#dns_rr.type,
+	Class = RR#dns_rr.class,
+	TTL = RR#dns_rr.ttl,
+	Length = RR#dns_rr.length,
+	Data = RR#dns_rr.data,
+
+	<<Name/binary, Type:16, Class:16, TTL:32, Length:16, Data/binary>>.
 
 encode_qname(Name) ->
 	encode_qname(Name, <<>>).
