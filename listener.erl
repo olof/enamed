@@ -62,7 +62,7 @@ gen_notimpl(Dns) ->
 	dnspkt:encode({
 		{header, #dns_header{
 			id=Id,
-			qr=0, opcode=Opcode, aa=0, rd=0, ra=0,
+			qr=1, opcode=Opcode, aa=0, rd=0, ra=0,
 			rcode=?DNS_RCODE_NOTIMP,
 			qdcount=Qdcount
 		}},
