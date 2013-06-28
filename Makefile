@@ -21,5 +21,5 @@ test: dnspkt.beam
 clean:
 	$(RM) $(GENERATED_FILES)
 
-%.beam: %.erl
+%.beam: %.erl dnsrecord.hrl
 	$(ERLC) $(ERLCFLAGS) $<
