@@ -9,7 +9,7 @@
 % offered as-is, without any warranty.
 
 -module(dnspkt).
--export([parse_dnspkt/1]).
+-export([parse_dnspkt/1, dnspkt_encode_header/1]).
 -include("dnsrecord.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
@@ -66,6 +66,30 @@ parse_dnspkt(RawPkt) ->
 		{ auth, Auth },
 		{ additional, Additional }
 	}.
+
+dnspkt_encode_header(Header) ->
+	Id = Header#dns_header.id,
+	Qr = Header#dns_header.qr,
+	Opcode = Header#dns_header.opcode,
+	Aa = Header#dns_header.aa,
+	Tc = Header#dns_header.tc,
+	Rd = Header#dns_header.rd,
+	Ra = Header#dns_header.ra,
+	Z = Header#dns_header.z,
+	Rcode = Header#dns_header.rcode,
+	Qdcount = Header#dns_header.qdcount,
+	Ancount = Header#dns_header.ancount,
+	Nscount = Header#dns_header.nscount,
+	Arcount = Header#dns_header.arcount,
+
+	<<
+		Id:16,
+		Qr:1, Opcode:4, Aa:1, Tc:1, Rd:1, Ra:1, Z:3, Rcode:4,
+		Qdcount:16,
+		Ancount:16,
+		Nscount:16,
+		Arcount:16
+	>>.
 
 % Extracts the first three bytes, and extracting the semantic
 % meaning of the bits; returns a tuple with a #dns_header record
@@ -377,3 +401,34 @@ parse_dnspkt_test_() ->
 			>>)
 		)
 	].
+
+dnspkt_encode_header_test_() ->
+	[
+		?_assertEqual(dnspkt_encode_header(
+				#dns_header{
+					id=32768,
+					qr=1,
+					opcode=0,
+					aa=0,
+					tc=0,
+					rd=1,
+					ra=0,
+					z=0,
+					rcode=0,
+					qdcount=1,
+					ancount=0,
+					nscount=0,
+					arcount=0
+				}
+			),
+			<<
+				32768:16,
+				1:1, 0:4, 0:1, 0:1, 1:1, 0:1, 0:3, 0:4,
+				1:16,
+				0:16,
+				0:16,
+				0:16
+			>>
+		)
+	].
+
