@@ -262,17 +262,8 @@ get_label(RawPkt) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 parse_header_test_() ->
 	[
-		?_assert(parse_header(
-			<<
-				32768:16,
-				1:1, ?DNS_OPCODE_QUERY:4, 0:1, 0:1, 1:1, 0:1, 0:3, ?DNS_RCODE_NOERROR:4,
-				1:16,
-				0:16,
-				0:16,
-				0:16,
-				"random data"
-			>>) =:= {
-				#dns_header{
+		?_assertEqual(
+			{#dns_header{
 					id=32768,
 					qr=1,
 					opcode=?DNS_OPCODE_QUERY,
@@ -282,68 +273,47 @@ parse_header_test_() ->
 					rcode=?DNS_RCODE_NOERROR,
 					qdcount=1
 				}, <<"random data">>
-			}
+			},
+			parse_header(<<
+				32768:16,
+				1:1, ?DNS_OPCODE_QUERY:4, 0:1, 0:1, 1:1, 0:1, 0:3, ?DNS_RCODE_NOERROR:4,
+				1:16,
+				0:16,
+				0:16,
+				0:16,
+				"random data"
+			>>)
 		)
 	].
 
 get_label_test_() ->
 	[
-		?_assert(
+		?_assertEqual(
+			{<<"example">>, <<3:8, "com", 0:8, "tail">>},
 			get_label(<<7:8, "example", 3:8, "com", 0:8, "tail">>)
-			=:=
-			{<<"example">>, <<3:8, "com", 0:8, "tail">>}
 		),
-		?_assert(
-			get_label(<<3:8, "com", 0:8>>)
-			=:=
-			{<<"com">>, <<0:8>>}
-		),
-		?_assert(
-			get_label(<<0:8, "tail">>)
-			=:=
-			{<<"">>, <<"tail">>}
-		),
-		?_assert(
-			get_label(<<0:8>>)
-			=:=
-			{<<"">>, <<"">>}
-		)
+		?_assertEqual({<<"com">>, <<0:8>>}, get_label(<<3:8, "com", 0:8>>)),
+		?_assertEqual({<<"">>, <<"tail">>}, get_label(<<0:8, "tail">>)),
+		?_assertEqual({<<"">>, <<"">>}, get_label(<<0:8>>))
 	].
 
 parse_qname_test_() ->
 	[
-		?_assert(
+		?_assertEqual(
+			{[<<"example">>, <<"com">>], <<"tail">>},
 			parse_qname(<<7:8, "example", 3:8, "com", 0:8, "tail">>)
-			=:=
-			{[<<"example">>, <<"com">>], <<"tail">>}
 		),
-		?_assert(
+		?_assertEqual(
+			{[<<"example">>, <<"com">>], <<"">>},
 			parse_qname(<<7:8, "example", 3:8, "com", 0:8>>)
-			=:=
-			{[<<"example">>, <<"com">>], <<"">>}
 		),
-		?_assert(
-			parse_qname(<<0:8, "tail">>)
-			=:=
-			{[], <<"tail">>}
-		),
-		?_assert(
-			parse_qname(<<0:8>>)
-			=:=
-			{[], <<"">>}
-		)
+		?_assertEqual({[], <<"tail">>}, parse_qname(<<0:8, "tail">>)),
+		?_assertEqual({[], <<"">>}, parse_qname(<<0:8>>))
 	].
 
 parse_qsection_test_() ->
 	[
-		?_assert(
-			parse_qsection(
-				<<
-					7:8, "example", 3:8, "com", 0:8,
-					?DNS_RR_SOA:16, ?DNS_CLASS_IN:16,
-					"tail"
-				>>, 1)
-			=:=
+		?_assertEqual(
 			{
 				[
 					#dns_question{
@@ -352,14 +322,15 @@ parse_qsection_test_() ->
 						class=?DNS_CLASS_IN
 					}
 				], <<"tail">>
-			}
-		),
-		?_assert(
+			},
 			parse_qsection(
 				<<
-					7:8, "example", 3:8, "com", 0:8, ?DNS_RR_SOA:16, ?DNS_CLASS_IN:16
+					7:8, "example", 3:8, "com", 0:8,
+					?DNS_RR_SOA:16, ?DNS_CLASS_IN:16,
+					"tail"
 				>>, 1)
-			=:=
+		),
+		?_assertEqual(
 			{
 				[
 					#dns_question{
@@ -368,11 +339,13 @@ parse_qsection_test_() ->
 						class=?DNS_CLASS_IN
 					}
 				], <<"">>
-			}
+			},
+			parse_qsection(
+				<<
+					7:8, "example", 3:8, "com", 0:8, ?DNS_RR_SOA:16, ?DNS_CLASS_IN:16
+				>>, 1)
 		),
-		?_assert(
-			parse_qsection(<<0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16>>, 1)
-			=:=
+		?_assertEqual(
 			{
 				[
 					#dns_question{
@@ -381,19 +354,12 @@ parse_qsection_test_() ->
 						class=?DNS_CLASS_IN
 					}
 				], <<"">>
-			}
+			},
+			parse_qsection(<<0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16>>, 1)
 		),
 
 		% Multiple question entries in qsection
-		?_assert(
-			parse_qsection(
-				<<
-					0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16,
-					7:8, "example", 3:8, "com", 0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16,
-					3:8, "iis", 2:8, "se", 0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16
-				>>, 3
-			)
-			=:=
+		?_assertEqual(
 			{
 				[
 					#dns_question{
@@ -412,7 +378,14 @@ parse_qsection_test_() ->
 						class=?DNS_CLASS_IN
 					}
 				], <<"">>
-			}
+			},
+			parse_qsection(
+				<<
+					0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16,
+					7:8, "example", 3:8, "com", 0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16,
+					3:8, "iis", 2:8, "se", 0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16
+				>>, 3
+			)
 		)
 	].
 
