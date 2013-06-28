@@ -6,32 +6,35 @@ level DNS protocol details is a big plus). Any feedback is welcome.
 
 In it's current shape, it can decode DNS packets and respond to
 queries (with the caveat that it only responds with not
-implemented to all queries. It does respond with the query's ID
-and opcode though...).
+implemented to all queries. It does respond with the query's ID,
+opcode and question section though...).
 
 With that said, to get it up and running:
 
     $ make
     $ erl
-    1> listener:start(5353)
+    1> listener:start(53535)
 
 And from another shell:
 
-    $ dig @127.0.0.1 +notcp -p 5353 example.com
+    $ dig @localhost +notcp -p 53535 example.com
 
 And you should see something like this:
 
-    ; <<>> DiG 9.8.4-rpz2+rl005.12-P1 <<>> @127.0.0.1 +notcp -p 5353 example.com
+    ; <<>> DiG 9.8.4-rpz2+rl005.12-P1 <<>> @localhost -p 53535 +notcp example.com
     ; (1 server found)
     ;; global options: +cmd
     ;; Got answer:
-    ;; ->>HEADER<<- opcode: QUERY, status: NOTIMP, id: 64923
-    ;; flags: qr; QUERY: 0, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0
+    ;; ->>HEADER<<- opcode: QUERY, status: NOTIMP, id: 55227
+    ;; flags: qr; QUERY: 1, ANSWER: 0, AUTHORITY: 0, ADDITIONAL: 0
 
-    ;; Query time: 0 msec
-    ;; SERVER: 127.0.0.1#5353(127.0.0.1)
-    ;; WHEN: Thu Jun 27 21:47:53 2013
-    ;; MSG SIZE  rcvd: 12
+    ;; QUESTION SECTION:
+    ;example.com.			IN	A
+
+    ;; Query time: 22 msec
+    ;; SERVER: 127.0.0.1#53535(127.0.0.1)
+    ;; WHEN: Fri Jun 28 16:34:41 2013
+    ;; MSG SIZE  rcvd: 29
 
 TODO
 ====
