@@ -4,6 +4,8 @@ export LANG=C
 ERLC ?= erlc
 ERL ?= erl
 
+ERLCFLAGS += -Werror
+
 MODULES = dnspkt listener
 
 GENERATED_FILES = \
@@ -20,4 +22,4 @@ clean:
 	$(RM) $(GENERATED_FILES)
 
 %.beam: %.erl
-	$(ERLC) $<
+	$(ERLC) $(ERLCFLAGS) $<
