@@ -265,7 +265,7 @@ parse_header_test_() ->
 		?_assert(parse_header(
 			<<
 				32768:16,
-				1:1, 0:4, 0:1, 0:1, 1:1, 0:1, 0:3, 0:4,
+				1:1, ?DNS_OPCODE_QUERY:4, 0:1, 0:1, 1:1, 0:1, 0:3, ?DNS_RCODE_NOERROR:4,
 				1:16,
 				0:16,
 				0:16,
@@ -275,13 +275,13 @@ parse_header_test_() ->
 				#dns_header{
 					id=32768,
 					qr=1,
-					opcode=0,
+					opcode=?DNS_OPCODE_QUERY,
 					aa=0,
 					tc=0,
 					rd=1,
 					ra=0,
 					z=0,
-					rcode=0,
+					rcode=?DNS_RCODE_NOERROR,
 					qdcount=1,
 					ancount=0,
 					nscount=0,
@@ -342,40 +342,48 @@ parse_qname_test_() ->
 parse_qsection_test_() ->
 	[
 		?_assert(
-			parse_qsection(<<7:8, "example", 3:8, "com", 0:8, 6:16, 1:16, "tail">>, 1)
+			parse_qsection(
+				<<
+					7:8, "example", 3:8, "com", 0:8,
+					?DNS_RR_SOA:16, ?DNS_CLASS_IN:16,
+					"tail"
+				>>, 1)
 			=:=
 			{
 				[
 					#dns_question{
 						name=[<<"example">>, <<"com">>],
-						type=6,
-						class=1
+						type=?DNS_RR_SOA,
+						class=?DNS_CLASS_IN
 					}
 				], <<"tail">>
 			}
 		),
 		?_assert(
-			parse_qsection(<<7:8, "example", 3:8, "com", 0:8, 6:16, 1:16>>, 1)
+			parse_qsection(
+				<<
+					7:8, "example", 3:8, "com", 0:8, ?DNS_RR_SOA:16, ?DNS_CLASS_IN:16
+				>>, 1)
 			=:=
 			{
 				[
 					#dns_question{
 						name=[<<"example">>, <<"com">>],
-						type=6,
-						class=1
+						type=?DNS_RR_SOA,
+						class=?DNS_CLASS_IN
 					}
 				], <<"">>
 			}
 		),
 		?_assert(
-			parse_qsection(<<0:8, 1:16, 1:16>>, 1)
+			parse_qsection(<<0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16>>, 1)
 			=:=
 			{
 				[
 					#dns_question{
 						name=[],
-						type=1,
-						class=1
+						type=?DNS_RR_A,
+						class=?DNS_CLASS_IN
 					}
 				], <<"">>
 			}
@@ -385,9 +393,9 @@ parse_qsection_test_() ->
 		?_assert(
 			parse_qsection(
 				<<
-					0:8, 1:16, 1:16,
-					7:8, "example", 3:8, "com", 0:8, 1:16, 1:16,
-					3:8, "iis", 2:8, "se", 0:8, 1:16, 1:16
+					0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16,
+					7:8, "example", 3:8, "com", 0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16,
+					3:8, "iis", 2:8, "se", 0:8, ?DNS_RR_A:16, ?DNS_CLASS_IN:16
 				>>, 3
 			)
 			=:=
@@ -395,18 +403,18 @@ parse_qsection_test_() ->
 				[
 					#dns_question{
 						name=[],
-						type=1,
-						class=1
+						type=?DNS_RR_A,
+						class=?DNS_CLASS_IN
 					},
 					#dns_question{
 						name=[<<"example">>, <<"com">>],
-						type=1,
-						class=1
+						type=?DNS_RR_A,
+						class=?DNS_CLASS_IN
 					},
 					#dns_question{
 						name=[<<"iis">>, <<"se">>],
-						type=1,
-						class=1
+						type=?DNS_RR_A,
+						class=?DNS_CLASS_IN
 					}
 				], <<"">>
 			}
@@ -420,8 +428,8 @@ parse_section_test_() ->
 				[
 					#dns_rr{
 						name=[<<"example">>, <<"com">>],
-						type=16,
-						class=1,
+						type=?DNS_RR_TXT,
+						class=?DNS_CLASS_IN,
 						ttl=3600,
 						length=8,
 						data= <<"unittest">>
@@ -429,7 +437,8 @@ parse_section_test_() ->
 				], <<"tail">>
 			},
 			parse_section(<<
-				7:8, "example", 3:8, "com", 0:8, 16:16, 1:16, 3600:32, 8:16,
+				7:8, "example", 3:8, "com", 0:8,
+				?DNS_RR_TXT:16, ?DNS_CLASS_IN:16, 3600:32, 8:16,
 				"unittest",
 				"tail"
 			>>, 1)
@@ -443,13 +452,13 @@ parse_dnspkt_test_() ->
 				{header, #dns_header{
 					id=12345,
 					qr=1,
-					opcode=0,
+					opcode=?DNS_OPCODE_QUERY,
 					aa=0,
 					tc=0,
 					rd=1,
 					ra=0,
 					z=0,
-					rcode=0,
+					rcode=?DNS_RCODE_NOERROR,
 					qdcount=1,
 					ancount=0,
 					nscount=0,
@@ -458,8 +467,8 @@ parse_dnspkt_test_() ->
 				{question, [
 					#dns_question{
 						name=[<<"example">>, <<"com">>],
-						type=16,
-						class=1
+						type=?DNS_RR_TXT,
+						class=?DNS_CLASS_IN
 					}]
 				},
 				{answer, []},
@@ -467,9 +476,10 @@ parse_dnspkt_test_() ->
 				{additional, []}
 			},
 			decode(<<
-				12345:16, 1:1, 0:4, 0:1, 0:1, 1:1, 0:1, 0:3, 0:4,
+				12345:16, 1:1, ?DNS_OPCODE_QUERY:4, 0:1, 0:1, 1:1, 0:1, 0:3,
+				?DNS_RCODE_NOERROR:4,
 				1:16, 0:16, 0:16, 0:16,
-				7:8, "example", 3:8, "com", 0:8, 16:16, 1:16
+				7:8, "example", 3:8, "com", 0:8, ?DNS_RR_TXT:16, ?DNS_CLASS_IN:16
 			>>)
 		)
 	].
@@ -479,7 +489,7 @@ dnspkt_encode_header_test_() ->
 		?_assertEqual(
 			<<
 				32768:16,
-				1:1, 0:4, 0:1, 0:1, 1:1, 0:1, 0:3, 0:4,
+				1:1, ?DNS_OPCODE_QUERY:4, 0:1, 0:1, 1:1, 0:1, 0:3, ?DNS_RCODE_NOERROR:4,
 				1:16,
 				0:16,
 				0:16,
@@ -489,13 +499,13 @@ dnspkt_encode_header_test_() ->
 				#dns_header{
 					id=32768,
 					qr=1,
-					opcode=0,
+					opcode=?DNS_OPCODE_QUERY,
 					aa=0,
 					tc=0,
 					rd=1,
 					ra=0,
 					z=0,
-					rcode=0,
+					rcode=?DNS_RCODE_NOERROR,
 					qdcount=1,
 					ancount=0,
 					nscount=0,
@@ -538,10 +548,7 @@ dnspkt_encode_question_test_() ->
 			)
 		),
 		?_assertEqual(
-			<<
-				0:8,
-				?DNS_RR_SOA:16, ?DNS_CLASS_IN:16
-			>>,
+			<<0:8, ?DNS_RR_SOA:16, ?DNS_CLASS_IN:16>>,
 			dnspkt_encode_question(
 				#dns_question{
 					name=[],
