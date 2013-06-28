@@ -9,7 +9,7 @@
 % offered as-is, without any warranty.
 
 -module(dnspkt).
--export([parse_dnspkt/1, dnspkt_encode_header/1]).
+-export([parse_dnspkt/1, dnspkt_encode_header/1, dnspkt_encode_qsection/1]).
 -include("dnsrecord.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
@@ -90,6 +90,36 @@ dnspkt_encode_header(Header) ->
 		Nscount:16,
 		Arcount:16
 	>>.
+
+dnspkt_encode_qsection(Questions) ->
+	dnspkt_encode_qsection(Questions, <<>>).
+
+dnspkt_encode_qsection([], Pkt) ->
+	Pkt;
+dnspkt_encode_qsection([Question|Questions], Pkt) ->
+	EncQuestion = dnspkt_encode_question(Question),
+	dnspkt_encode_qsection(Questions, <<Pkt/binary, EncQuestion/binary>>).
+
+dnspkt_encode_question(Question) ->
+	Name = Question#dns_question.name,
+	Type = Question#dns_question.type,
+	Class = Question#dns_question.class,
+
+	EncQname = encode_qname(Name),
+	<<EncQname/binary, Type:16, Class:16>>.
+
+encode_qname(Name) ->
+	encode_qname(Name, <<>>).
+
+encode_qname([], Pkt) ->
+	<<Pkt/binary, 0:8>>;
+encode_qname([Label|Tail], Pkt) ->
+	EncLabel = encode_label(Label),
+	encode_qname(Tail, <<Pkt/binary, EncLabel/binary>>).
+
+encode_label(Label) ->
+	Len = byte_size(Label),
+	<<Len:8, Label/binary>>.
 
 % Extracts the first three bytes, and extracting the semantic
 % meaning of the bits; returns a tuple with a #dns_header record
@@ -404,7 +434,16 @@ parse_dnspkt_test_() ->
 
 dnspkt_encode_header_test_() ->
 	[
-		?_assertEqual(dnspkt_encode_header(
+		?_assertEqual(
+			<<
+				32768:16,
+				1:1, 0:4, 0:1, 0:1, 1:1, 0:1, 0:3, 0:4,
+				1:16,
+				0:16,
+				0:16,
+				0:16
+			>>,
+			dnspkt_encode_header(
 				#dns_header{
 					id=32768,
 					qr=1,
@@ -420,15 +459,104 @@ dnspkt_encode_header_test_() ->
 					nscount=0,
 					arcount=0
 				}
-			),
+			)
+		)
+	].
+
+encode_qname_test_() ->
+	[
+		?_assertEqual(
+			<<7:8, "example", 3:8, "com", 0:8>>,
+			encode_qname([<<"example">>, <<"com">>])
+		),
+		?_assertEqual(
+			<<0:8>>,
+			encode_qname([])
+		)
+	].
+
+encode_label_test_() ->
+	[
+		?_assertEqual(<<3:8, "foo">>, encode_label(<<"foo">>))
+	].
+
+dnspkt_encode_question_test_() ->
+	[
+		?_assertEqual(
 			<<
-				32768:16,
-				1:1, 0:4, 0:1, 0:1, 1:1, 0:1, 0:3, 0:4,
-				1:16,
-				0:16,
-				0:16,
-				0:16
-			>>
+				7:8, "example", 3:8, "com", 0:8,
+				?DNS_RR_SOA:16, ?DNS_CLASS_IN:16
+			>>,
+			dnspkt_encode_question(
+				#dns_question{
+					name=[<<"example">>, <<"com">>],
+					type=?DNS_RR_SOA,
+					class=?DNS_CLASS_IN
+				}
+			)
+		),
+		?_assertEqual(
+			<<
+				0:8,
+				?DNS_RR_SOA:16, ?DNS_CLASS_IN:16
+			>>,
+			dnspkt_encode_question(
+				#dns_question{
+					name=[],
+					type=?DNS_RR_SOA,
+					class=?DNS_CLASS_IN
+				}
+			)
+		)
+	].
+
+dnspkt_encode_qsection_test_() ->
+	[
+		?_assertEqual(
+			<<
+				7:8, "example", 3:8, "com", 0:8,
+				?DNS_RR_SOA:16, ?DNS_CLASS_IN:16
+			>>,
+			dnspkt_encode_qsection([
+				#dns_question{
+					name=[<<"example">>, <<"com">>],
+					type=?DNS_RR_SOA,
+					class=?DNS_CLASS_IN
+				}
+			])
+		),
+		?_assertEqual(
+			<<
+				0:8,
+				?DNS_RR_SOA:16, ?DNS_CLASS_IN:16
+			>>,
+			dnspkt_encode_qsection([
+				#dns_question{
+					name=[],
+					type=?DNS_RR_SOA,
+					class=?DNS_CLASS_IN
+				}
+			])
+		),
+		?_assertEqual(
+			<<
+				7:8, "example", 3:8, "com", 0:8,
+				?DNS_RR_SOA:16, ?DNS_CLASS_IN:16,
+				5:8, "icann", 3:8, "org", 0:8,
+				?DNS_RR_TXT:16, ?DNS_CLASS_IN:16
+			>>,
+			dnspkt_encode_qsection([
+				#dns_question{
+					name=[<<"example">>, <<"com">>],
+					type=?DNS_RR_SOA,
+					class=?DNS_CLASS_IN
+				},
+				#dns_question{
+					name=[<<"icann">>, <<"org">>],
+					type=?DNS_RR_TXT,
+					class=?DNS_CLASS_IN
+				}
+			])
 		)
 	].
 
