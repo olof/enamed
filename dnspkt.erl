@@ -277,15 +277,10 @@ parse_header_test_() ->
 					qr=1,
 					opcode=?DNS_OPCODE_QUERY,
 					aa=0,
-					tc=0,
 					rd=1,
 					ra=0,
-					z=0,
 					rcode=?DNS_RCODE_NOERROR,
-					qdcount=1,
-					ancount=0,
-					nscount=0,
-					arcount=0
+					qdcount=1
 				}, <<"random data">>
 			}
 		)
@@ -454,15 +449,10 @@ parse_dnspkt_test_() ->
 					qr=1,
 					opcode=?DNS_OPCODE_QUERY,
 					aa=0,
-					tc=0,
 					rd=1,
 					ra=0,
-					z=0,
 					rcode=?DNS_RCODE_NOERROR,
-					qdcount=1,
-					ancount=0,
-					nscount=0,
-					arcount=0
+					qdcount=1
 				}},
 				{question, [
 					#dns_question{
@@ -501,15 +491,10 @@ dnspkt_encode_header_test_() ->
 					qr=1,
 					opcode=?DNS_OPCODE_QUERY,
 					aa=0,
-					tc=0,
 					rd=1,
 					ra=0,
-					z=0,
 					rcode=?DNS_RCODE_NOERROR,
-					qdcount=1,
-					ancount=0,
-					nscount=0,
-					arcount=0
+					qdcount=1
 				}
 			)
 		)

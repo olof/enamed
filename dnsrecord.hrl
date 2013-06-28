@@ -1,10 +1,10 @@
 -record(dns_header, {
 	id,
-	qr, opcode, aa, tc, rd, ra, z, rcode,
-	qdcount,
-	ancount,
-	nscount,
-	arcount
+	qr, opcode, aa, tc=0, rd, ra, z=0, rcode,
+	qdcount=0,
+	ancount=0,
+	nscount=0,
+	arcount=0
 }).
 
 -record(dns_question, {
