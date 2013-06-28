@@ -41,7 +41,7 @@ listen_loop(Socket) ->
 	listen_loop(Socket).
 
 worker(PPid, Addr, Port, Pkt) ->
-	Dns = dnspkt:parse_dnspkt(Pkt),
+	Dns = dnspkt:decode(Pkt),
 	Response = gen_notimpl(Dns),
 
 	PPid ! {reply, Addr, Port, Response}.

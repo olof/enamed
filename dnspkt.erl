@@ -9,7 +9,7 @@
 % offered as-is, without any warranty.
 
 -module(dnspkt).
--export([parse_dnspkt/1, dnspkt_encode_header/1, dnspkt_encode_qsection/1]).
+-export([decode/1, dnspkt_encode_header/1, dnspkt_encode_qsection/1]).
 -include("dnsrecord.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
@@ -43,7 +43,7 @@
 %   RFC 1034 - DNS architecture
 %   RFC 1035 - DNS implementation
 %
-parse_dnspkt(RawPkt) ->
+decode(RawPkt) ->
 	{Header, HeaderTail} = parse_header(RawPkt),
 
 	{Question, QuestionTail} = parse_qsection(
@@ -424,7 +424,7 @@ parse_dnspkt_test_() ->
 				{auth, []},
 				{additional, []}
 			},
-			parse_dnspkt(<<
+			decode(<<
 				12345:16, 1:1, 0:4, 0:1, 0:1, 1:1, 0:1, 0:3, 0:4,
 				1:16, 0:16, 0:16, 0:16,
 				7:8, "example", 3:8, "com", 0:8, 16:16, 1:16
