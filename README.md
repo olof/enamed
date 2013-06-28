@@ -39,8 +39,6 @@ Lots of stuff! Of the top of my head:
 
 * OTP-stuff, make it more resilient and more in line with
   erlang best practices
-* DNS packet encoding (I don't like the hardcoding dns packets i
-  do now)
 
 DNS features
 ------------
