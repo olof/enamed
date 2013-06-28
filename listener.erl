@@ -49,7 +49,7 @@ worker(PPid, Addr, Port, Pkt) ->
 gen_notimpl(Dns) ->
 	{
 		{header, Header},
-		{question, _},
+		{question, Questions},
 		{answer, _},
 		{auth, _},
 		{additional, _}
@@ -57,9 +57,15 @@ gen_notimpl(Dns) ->
 
 	Id = Header#dns_header.id,
 	Opcode = Header#dns_header.opcode,
+	Qdcount = Header#dns_header.qdcount,
 
-	<<
-		Id:16,
-		1:1, Opcode:4, 0:1, 0:1, 0:1, 0:1, 0:3, 4:4,
-		0:16, 0:16, 0:16, 0:16
-	>>.
+	dnspkt:encode({
+		{header, #dns_header{
+			id=Id, qr=0, opcode=Opcode, aa=0, tc=0, rd=0, ra=0, z=0, rcode=4,
+			qdcount=Qdcount, ancount=0, nscount=0, arcount=0
+		}},
+		{question, Questions},
+		{answer, []},
+		{auth, []},
+		{additional, []}
+	}).
