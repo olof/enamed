@@ -1,20 +1,3 @@
--record(dns_header, {
-	id,
-	qr, opcode, aa, tc=0, rd, ra, z=0, rcode,
-	qdcount=0,
-	ancount=0,
-	nscount=0,
-	arcount=0
-}).
-
--record(dns_question, {
-	name, type, class
-}).
-
--record(dns_rr, {
-	name, type, class, ttl, length, data
-}).
-
 %% Opcodes
 % RFC 1035
 -define(DNS_OPCODE_QUERY, 0).
@@ -60,3 +43,20 @@
 -define(DNS_RR_HINFO, 13).
 -define(DNS_RR_MX, 15).
 -define(DNS_RR_TXT, 16).
+
+-record(dns_header, {
+	id,
+	qr=0, opcode=1, aa=0, tc=0, rd=0, ra=0, z=0, rcode=0,
+	qdcount=0,
+	ancount=0,
+	nscount=0,
+	arcount=0
+}).
+
+-record(dns_question, {
+	name, type, class=?DNS_CLASS_IN
+}).
+
+-record(dns_rr, {
+	name, type, class=?DNS_CLASS_IN, ttl, length, data
+}).
