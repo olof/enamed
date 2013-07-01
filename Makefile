@@ -6,7 +6,7 @@ ERL ?= erl
 
 ERLCFLAGS += -Werror
 
-MODULES = dnspkt listener
+MODULES = enamed dnspkt
 
 GENERATED_FILES = \
 	$(addsuffix .beam, $(MODULES)) \

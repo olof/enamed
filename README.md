@@ -13,7 +13,7 @@ With that said, to get it up and running:
 
     $ make
     $ erl
-    1> listener:start(53535)
+    1> enamed:start(53535)
 
 And from another shell:
 

@@ -8,7 +8,7 @@
 % provided the copyright notice are preserved. This file is
 % offered as-is, without any warranty.
 
--module(listener).  % listener for the dark brotherhood...
+-module(enamed).
 -export([start/0, start/1, worker/4]).
 -include("dnspkt.hrl").
 
