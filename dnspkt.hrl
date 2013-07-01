@@ -1,3 +1,5 @@
+% vim: ts=2:sw=2:noet:tw=80
+
 %% Opcodes
 % RFC 1035
 -define(DNS_OPCODE_QUERY, 0).
