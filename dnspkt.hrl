@@ -1,5 +1,12 @@
 % vim: ts=2:sw=2:noet:tw=80
 
+% Copyright 2013, Olof Johansson <olof@ethup.se>
+%
+% Copying and distribution of this file, with or without
+% modification, are permitted in any medium without royalty
+% provided the copyright notice are preserved. This file is
+% offered as-is, without any warranty.
+
 %% Opcodes
 % RFC 1035
 -define(DNS_OPCODE_QUERY, 0).
