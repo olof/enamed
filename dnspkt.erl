@@ -10,7 +10,7 @@
 
 -module(dnspkt).
 -export([decode/1, encode/1]).
--include("dnsrecord.hrl").
+-include("dnspkt.hrl").
 
 -include_lib("eunit/include/eunit.hrl").
 

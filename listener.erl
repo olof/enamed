@@ -10,7 +10,7 @@
 
 -module(listener).  % listener for the dark brotherhood...
 -export([start/0, start/1, worker/4]).
--include("dnsrecord.hrl").
+-include("dnspkt.hrl").
 
 start() ->
 	start(53).
