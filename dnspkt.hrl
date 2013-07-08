@@ -66,6 +66,10 @@
 	name, type, class=?DNS_CLASS_IN
 }).
 
+% This record represents a DNS RR including its data. All keys
+% should be obvious, but note that length defaults to -1, meaning
+% that enamed should calculate it when needed. This is to make it
+% simpler to load zonedata.
 -record(dns_rr, {
-	name, type, class=?DNS_CLASS_IN, ttl, length, data
+	name, type, class=?DNS_CLASS_IN, ttl, length=-1, data
 }).
