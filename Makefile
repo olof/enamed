@@ -9,7 +9,7 @@ HEADERS = dnspkt.hrl
 
 ERLCFLAGS += -Werror
 
-MODULES = enamed dnspkt
+MODULES = enamed dnspkt dnsutils
 
 GENERATED_FILES = \
 	$(addsuffix .beam, $(MODULES)) \
@@ -18,8 +18,9 @@ GENERATED_FILES = \
 
 all: $(addsuffix .beam, $(MODULES))
 
-test: dnspkt.beam
+test: dnspkt.beam dnsutils.beam
 	$(ERL) -noshell -run dnspkt test -s init stop
+	$(ERL) -noshell -run dnsutils test -s init stop
 
 clean:
 	$(RM) $(GENERATED_FILES)
