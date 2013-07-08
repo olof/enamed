@@ -4,6 +4,9 @@ export LANG=C
 ERLC ?= erlc
 ERL ?= erl
 
+# For now, every beam file depends on every header file.. :(
+HEADERS = dnspkt.hrl
+
 ERLCFLAGS += -Werror
 
 MODULES = enamed dnspkt
@@ -21,5 +24,5 @@ test: dnspkt.beam
 clean:
 	$(RM) $(GENERATED_FILES)
 
-%.beam: %.erl dnsrecord.hrl
+%.beam: %.erl $(HEADERS)
 	$(ERLC) $(ERLCFLAGS) $<
